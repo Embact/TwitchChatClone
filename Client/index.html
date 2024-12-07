@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;        
+      }
+
+      .tooltip-inner {
+        font-weight: bold;
+        font-size: 12px;
+        opacity:1;
+        padding: 3px 5px;
+      }
+
+      ::-webkit-scrollbar {
+        background-color: transparent;
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        padding: 5px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background-color: #525254;
+        border-radius: 10px;
+      }
+
+      body {
+        background: #703bed;
+      }
+
+      .wallpaper {
+        /* background: url('https://wallery.app/dufovot/twitch-wallpaper.webp'); */
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 0;
+      }
+
+      .wallpaper::after {
+        content: "";
+        background: url("http://127.0.0.1:5500/assets/images/twitch.png");
+        background-size: 15%;
+        /* Adjust size to include spacing */
+        opacity: 0.1;
+        /* Set the opacity */
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: -1;
+        /* Ensure it stays behind the content */
+        animation: backImage 100s ease infinite;
+        background-position: var(--x, 50%) var(--y, 50%);
+        transition: background-position 0.2s ease;
+        /* Smooth transition */
+      }
+
+      ::selection:not(input) {
+        background-color: transparent;
+      }
+
+      body {
+        overflow: hidden;
+      }
+
+      .header {
+        backdrop-filter: blur(5px);
+        background-color: rgba(0, 0, 0, 0.4);
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+        display: flex;
+        color: #fff;
+        font-family: sans-serif;
+        font-size: 14px;
+        position: absolute;
+        left: 50%;
+        top: 0;
+        z-index: 99999;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        /* width: 210px; */
+        box-shadow: 0 15px 15px -10px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(0, 0, 0, 0.4);
+        border-top: 0;
+        transition: 0.3s;
+      }
+
+      .header.hide-header {
+        top: -37px;
+      }
+
+      .header > div:nth-child(2),
+      .header > div:last-child,
+      .header > div:nth-child(4) ,
+      .header > div:nth-child(5),
+      .hover-btn{
+        transition: 0.3s;
+        height: 100%;
+        padding: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+
+      .header > div:nth-child(2):hover,
+      .header > div:last-child:hover,
+      .header > div:nth-child(4):hover,
+      .header > div:nth-child(5):hover ,
+      .hover-btn:hover{
+        background-color: rgba(0, 0, 0, 0.4);
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+      }
+
+      .header div:nth-child(3) {
+        flex: 3;
+        text-align: center;
+        white-space: nowrap;
+        padding: 0 5px;
+      }
+
+      .rooms-container {
+        display: flex;
+        flex-wrap: wrap;
+        height: 100vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+
+      .rooms-container > div {
+        width: 100%;
+        flex: 1 1 25%;
+        position: relative;
+        min-height: 33.33333333333333vh;
+      }
+
+      .rooms-container > div > iframe {
+        width: 100%;
+        height: 100%;
+        transition: 0.3s;
+      }
+
+      .expand-button {
+        position: absolute;
+        z-index: 9;
+        top: 0;
+        right: 0;
+        padding: 4px;
+        border-bottom-left-radius: 8px;
+        background-color: #772ce8;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+
+      .expand-button:hover {
+        background-color: #5d24b3;
+      }
+
+      .expand {
+        position: absolute !important;
+        z-index: 9999999;
+        animation: expand 0.3s forwards;
+      }
+
+      .header .toogle-header {
+        backdrop-filter: blur(5px);
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 6px 15px;
+        display: flex;
+        gap: 5px;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+        box-shadow: 0 15px 15px -10px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(0, 0, 0, 0.4);
+      }
+
+      .header .toogle-header span{
+        display: inline-block;
+        height: 4px;
+        width: 4px;
+        border-radius: 50%;
+        border: 1px solid #FFF;
+      }
+
+      .header input {
+        height: 100%;
+        width: 40px;
+        text-align: center;
+        background-color: transparent;
+        border: 0;
+        color: #fff;
+        outline: 0;
+        /* background-color: red; */
+        border-radius: 4px;
+        font-size: 12px;
+      }
+      .room {
+        position: absolute;
+        top: 55%;
+        left: 50%;
+        width: 700px;
+        transform: translate(-50%, -50%);
+        padding: 120px;
+      }
+
+      .room * {
+        z-index: 2;
+      }
+
+      .room::before {
+          content: "";
+          background-color: #402779;
+          height: 70%;
+          width: 55%;
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          z-index: 0;
+          transform: translate(-50%, -50%) skewY(8deg);
+      }
+
+      .room-form {
+        width: 300px;
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+      }
+
+      .room h1 {
+        color: #fff;
+        text-align: center;
+        font-family: sans-serif;
+        transform: skew(-20deg);
+        font-size: 30px;
+        font-weight: 900;
+      }
+
+      .room input {
+        padding: 15px;
+        text-align: center;
+        outline: none;
+        background-color: #2e1f52;
+        border: 2px solid #2e1f52;
+        color: #fff;
+        font-size: 20px;
+        transform: skew(-20deg);
+      }
+
+      .room button {
+        padding: 15px;
+        text-align: center;
+        border: 0;
+        outline: none;
+        background-color: #6c2eff;
+        color: #fff;
+        font-size: 20px;
+        transform: skew(-20deg);
+        cursor: pointer;
+        transition: 0.3s;
+        font-weight: 700;
+      }
+
+      .room button:hover {
+        background-color: #ffe000;
+        color: #000;
+      }
+
+      .danger-border {
+        border-color: #d31818 !important;
+      }
+
+      .logo {
+        position: absolute;
+        z-index: 1;
+        width: 380px;
+        left: 50%;
+        top: -220px;
+        transform: translateX(-50%);
+      }
+
+      .btn-group input:checked + .btn-outline-light svg {
+        color: #000;
+      }
+      .tooltip {
+        z-index: 9999999999999;
+      }
+      @keyframes expand {
+        0% {
+          width: 0vw;
+          height: 0vh;
+        }
+
+        100% {
+          width: 100vw;
+          height: 100vh;
+        }
+      }
+      @keyframes backImage {
+        0% {
+          background-position: 0 0;
+        }
+        100% {
+          background-position: 1000% 1000%;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wallpaper"></div>
+    <div class="room">
+      <img src="http://127.0.0.1:5500/assets/images/logo2.png" class="logo" />
+      <div class="room-bg"></div>
+      <div class="room-form">
+        <h1>Join Live Stream</h1>
+        <input id="RoomName" placeholder="Room Name" />
+        <button id="JoinRoom">Join Room</button>
+      </div>
+    </div>
+    <div class="header hide-header d-none">
+      <div class="toogle-header" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Toggle Setting Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div id="decrease" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Remove Last Viewer">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" color="#ffffff" fill="none">
+          <path d="M20 12L4 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="room-name">ROOM NAME</div>
+      <div id="play" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Auto Add Viewers">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" color="#ffffff" fill="none" >
+            <path d="M12 7.5C12 9.433 10.433 11 8.5 11C6.567 11 5 9.433 5 7.5C5 5.567 6.567 4 8.5 4C10.433 4 12 5.567 12 7.5Z" stroke="currentColor" stroke-width="1.5" />
+            <path d="M13.5 11C15.433 11 17 9.433 17 7.5C17 5.567 15.433 4 13.5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            <path d="M13.1429 20H3.85714C2.83147 20 2 19.2325 2 18.2857C2 15.9188 4.07868 14 6.64286 14H10.3571C11.4023 14 12.3669 14.3188 13.1429 14.8568" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M19 14V20M22 17L16 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+        </svg>
+      </div>
+      <div id="Bot" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Auto Send Messages">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" color="#ffffff" fill="none">
+            <path d="M12.5 3.00372C11.6049 2.99039 10.7047 3.01289 9.8294 3.07107C5.64639 3.34913 2.31441 6.72838 2.04024 10.9707C1.98659 11.8009 1.98659 12.6607 2.04024 13.4909C2.1401 15.036 2.82343 16.4666 3.62791 17.6746C4.09501 18.5203 3.78674 19.5758 3.30021 20.4978C2.94941 21.1626 2.77401 21.495 2.91484 21.7351C3.05568 21.9752 3.37026 21.9829 3.99943 21.9982C5.24367 22.0285 6.08268 21.6757 6.74868 21.1846C7.1264 20.9061 7.31527 20.7668 7.44544 20.7508C7.5756 20.7348 7.83177 20.8403 8.34401 21.0513C8.8044 21.2409 9.33896 21.3579 9.8294 21.3905C11.2536 21.4852 12.7435 21.4854 14.1706 21.3905C18.3536 21.1125 21.6856 17.7332 21.9598 13.4909C22.0021 12.836 22.011 12.1627 21.9866 11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M15 5.5H22M18.5 2L18.5 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M11.9953 12.5H12.0043M15.9908 12.5H15.9998M7.99982 12.5H8.00879" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </div>
+      <div class="d-flex align-items-center">
+        <input type="text" id="timeoutMS" value="100" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Interval (ms)" />
+        <input type="text" class="text-danger fw-bold" id="MaxViewers" value="25" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Value" />
+        <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Add viewers in sequenece">
+          <input type="checkbox" class="btn-check" id="IsSequence" autocomplete="off" checked>
+          <label class="btn btn-outline-light p-1 border-0" style="font-size:11px;" for="IsSequence">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none">
+                <path d="M5.63604 18.3638C4.00736 16.7351 3 14.4851 3 11.9999C3 7.02929 7.02944 2.99986 12 2.99986C14.4853 2.99986 16.7353 4.00721 18.364 5.63589M20.2941 8.49986C20.7487 9.57574 21 10.7584 21 11.9999C21 16.9704 16.9706 20.9999 12 20.9999C10.7586 20.9999 9.57589 20.7485 8.5 20.2939" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M15.8292 3.82152C18.5323 2.13939 20.7205 1.51937 21.6005 2.39789C23.1408 3.93544 20.0911 9.48081 14.7889 14.7838C9.48663 20.0868 3.93971 23.1394 2.39946 21.6018C1.52414 20.728 2.13121 18.5599 3.79165 15.8774" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </label>
+        </div>
+        <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Parallel messages in interval">
+          <input type="checkbox" class="btn-check" id="IsParallel" autocomplete="off">
+          <label class="btn btn-outline-light p-1 border-0" style="font-size:11px;" for="IsParallel">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" color="#ffffff" fill="none">
+              <path d="M10.5 11.25C10.5 10.2835 9.7165 9.5 8.75 9.5C7.7835 9.5 7 10.2835 7 11.25C7 12.2165 7.7835 13 8.75 13C9.7165 13 10.5 12.2165 10.5 11.25Z" stroke="currentColor" stroke-width="2" />
+              <path d="M17 11.25C17 10.2835 16.2165 9.5 15.25 9.5C14.2835 9.5 13.5 10.2835 13.5 11.25C13.5 12.2165 14.2835 13 15.25 13C16.2165 13 17 12.2165 17 11.25Z" stroke="currentColor" stroke-width="2" />
+              <path d="M11 16L11.2929 15.6306C11.6262 15.2102 11.7929 15 12 15C12.2071 15 12.3738 15.2102 12.7071 15.6306L13 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M12 2C7.30558 2 3.5 5.76644 3.5 10.4126C3.5 12.1664 4.04229 13.795 4.96997 15.1428C4.71662 15.4221 4.5625 15.7914 4.5625 16.1962C4.5625 17.0674 5.27605 17.7736 6.15625 17.7736V18.9929C6.15625 19.6422 6.46621 20.2619 7.02648 20.5901C10.2351 22.47 13.7649 22.47 16.9735 20.5901C17.5338 20.2619 17.8438 19.6422 17.8438 18.9929V17.7736C18.724 17.7736 19.4375 17.0674 19.4375 16.1962C19.4375 15.7914 19.2834 15.4221 19.03 15.1428C19.9577 13.795 20.5 12.1664 20.5 10.4126C20.5 5.76644 16.6944 2 12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M14 21.5V20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M10 21.5V20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          </label>
+        </div>
+        <div id="AutoScroll" class="hover-btn" role="group" aria-label="" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Chat Scroll Down">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" color="#ffffff" fill="none">
+              <path d="M13.5 2L13.5 6M13.5 10L13.5 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M5 2C3.94531 3.13158 3.23544 4.50113 3 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              <path d="M12 7.5C12 7.03406 12 6.80109 12.0761 6.61732C12.1776 6.37229 12.3723 6.17761 12.6173 6.07612C12.8011 6 13.0341 6 13.5 6C13.9659 6 14.1989 6 14.3827 6.07612C14.6277 6.17761 14.8224 6.37229 14.9239 6.61732C15 6.80109 15 7.03406 15 7.5V8.5C15 8.96594 15 9.19891 14.9239 9.38268C14.8224 9.62771 14.6277 9.82239 14.3827 9.92388C14.1989 10 13.9659 10 13.5 10C13.0341 10 12.8011 10 12.6173 9.92388C12.3723 9.82239 12.1776 9.62771 12.0761 9.38268C12 9.19891 12 8.96594 12 8.5V7.5Z" stroke="currentColor" stroke-width="1.5" />
+              <path d="M6.24061 17.0888C6.43047 19.4803 8.32417 21.511 10.765 21.8118C11.6626 21.9223 12.5752 22 13.5 22C14.4247 22 15.3373 21.9223 16.2349 21.8118C18.6758 21.511 20.5694 19.4803 20.7593 17.0888C20.8909 15.4317 21 13.732 21 12C21 10.268 20.8909 8.56832 20.7593 6.91118C20.5694 4.51965 18.6758 2.48893 16.2349 2.1882C15.3373 2.07762 14.4247 2 13.5 2C12.5752 2 11.6626 2.07762 10.765 2.1882C8.32417 2.48893 6.43047 4.51965 6.24061 6.91118C6.10903 8.56832 6 10.268 6 12C6 13.732 6.10903 15.4317 6.24061 17.0888Z" stroke="currentColor" stroke-width="1.5" />
+          </svg>
+        </div>
+      </div>
+      <div id="increase" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Auto New Viewer">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" color="#ffffff" fill="none">
+          <path d="M12 4V20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M4 12H20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+    <div class="rooms-container"></div>
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script>
+      var RoomName = GetRoom() + "`s Chat";
+      var Broadcaster = GetRoom();
+      var users = [
+        "Hisham",
+        "Karim",
+        "Mohamed",
+        "ThunderWolf", "MysticShadow", "CosmicRider", "LunarKnight", "SolarFlare", "NebulaHunter", "StellarDrake", "GalaxyGamer", "PhantomBlade", "NovaStar", "AstroPhoenix", "QuantumFury", "PlasmaEagle", "MeteorWhiz", "AstroVoyager", "ZenithHero", "CosmicRaider", "TwilightSpecter", "StellarNinja", "OrionWarrior", "HyperionMage", "CelestialRogue", "NebulaSamurai", "CometStriker", "CosmicCrusader", "LunarAssassin", "StarfireHawk", "GalacticSorcerer", "ZenithChampion", "PhantomRanger", "AuroraGuardian", "CelestialKnight", "EclipseRider", "MeteorMage", "CosmicSentinel", "StarlightWarden", "NebulaStriker", "NovaFrost", "QuantumKnight", "AstroWarrior", "HyperionHunter", "StarfireSentinel", "CelestialVoyager", "LunarProtector", "PhantomSorcerer", "CosmicWizard", "StellarChampion", "TwilightHunter", "NovaGuardian", "GalacticAssassin", "VoidWalker", "StarChaser", "NebulaWraith", "GalacticWarden", "LunarSentinel", "PhantomNinja", "MeteorHunter", "AstroKnight", "QuantumSage", "NovaMage", "CelestialHunter", "EclipseWarrior", "CosmicWarden", "NebulaSage", "StellarRider", "GalacticKnight", "TwilightSorcerer", "LunarWarrior", "AuroraKnight", "PhantomHunter", "StarfireWarrior", "HyperionRogue", "QuantumHunter", "AstroRogue", "CosmicGuardian", "ZenithSorcerer", "LunarRanger", "StarlightHunter", "GalacticProtector", "CelestialAssassin", "NovaHunter", "NebulaWarrior", "StellarSage", "PhantomProtector", "VoidSorcerer", "StarfireRogue", "HyperionKnight", "MeteorRogue", "AstroGuardian", "QuantumProtector", "CosmicRogue", "ZenithHunter", "LunarSage", "GalacticVoyager", "TwilightKnight", "CelestialWarrior", "AuroraHunter", "PhantomSage", "StarfireGuardian", "HyperionHunter", "VoidRanger"
+      ];
+      var zIndex = 1000;
+      var isExpanded = false;
+      var isPlay = false;
+      var JoinButton = document.getElementById("JoinRoom");
+      var RoomNameInput = document.getElementById("RoomName");
+      var Header  = document.querySelector(".header");
+      var ToogleHeader = document.querySelector(".toogle-header");
+      var Messages = [
+        "Hello everyone! :e1:",
+        "How's it going? :e2:",
+        "Just started a new game. :e3: Excited to see how it goes!",
+        "Great stream so far! :e4:",
+        "Anyone else having connection issues? :e5:",
+        "Loving the content! Keep it up! :e6:",
+        "That play was awesome! :e7:",
+        "Back in a bit, need to grab some snacks. :e8:",
+        "Just joined, what did I miss? :e9:",
+        "Can you show us your setup? :e10:",
+        "Wow, that was intense! :e11:",
+        "Thanks for the stream! :e12:",
+        "Can't believe I finally made it to a live stream. :e13:",
+        "Any tips for beginners? :e14:",
+        "This game looks amazing! :e15:",
+        "First time watching, loving it so far! :e16:",
+        "Haha, that was hilarious! :e17:",
+        "Nice move there! :e18:",
+        "What's your favorite part of the game? :e19:",
+        "Shoutout to all the viewers! :e20:",
+        "Just hit the follow button! :e21:",
+        "How long have you been streaming? :e22:",
+        "Any upcoming streams we should look out for? :e23:",
+        "Lurking while working. :e24:",
+        "Such a chill stream. :e25:",
+        "The chat is on fire today! :e26:",
+        "Can you do a Q&A session? :e27:",
+        "That strategy was brilliant! :e28:",
+        "How do you stay so focused? :e29:",
+        "Taking notes for my own gameplay. :e30:",
+        "This is so entertaining! :e31:",
+        "Can we get a dance break? :e32:",
+        "That boss fight was epic! :e33:",
+        "You're killing it! :e34:",
+        "Thanks for all the tips! :e35:",
+        "What's your favorite game of all time? :e36:",
+        "Love the music in the background. :e37:",
+        "Anyone else here a night owl? :e38:",
+        "Can you play that part again? :e39:",
+        "The graphics in this game are stunning! :e40:",
+        "Thanks for the stream! :e41:",
+        "How do you balance streaming and life? :e42:",
+        "This chat is so supportive. :e43:",
+        "Great community here! :e44:",
+        "Can you give a shoutout to my friend? :e45:",
+        "What's the next game on your list? :e46:",
+        "Just made some popcorn for the stream. :e47:",
+        "This game is so nostalgic! :e48:",
+        "Can't wait for the next stream! :e49:",
+        "Just subscribed! :e50:",
+        "Does anyone have recommendations for similar games? :e1:",
+        "The commentary is on point! :e2:",
+        "How do you manage to read all the chat messages? :e3:",
+        "Thanks for creating such a welcoming space. :e4:",
+        "The energy in this stream is incredible! :e5:",
+        "Can you share your gaming setup? :e6:",
+        "Is there a way to get notified for all your streams? :e7:",
+        "Anyone else new here? :e8:",
+        "The attention to detail in this game is amazing! :e9:",
+        "How often do you stream? :e10:",
+        "Any plans for a charity stream? :e11:",
+        "That was a close call! :e12:",
+        "How did you get into streaming? :e13:",
+        "This is the highlight of my day. :e14:",
+        "The chat is moving so fast! :e15:",
+        "Can you recommend a good beginner's guide for this game? :e16:",
+        "Anyone else playing along? :e17:",
+        "Can you show us your game collection? :e18:",
+        "Love the positive vibes here! :e19:",
+        "How do you stay so motivated? :e20:",
+        "The gameplay is so smooth! :e21:",
+        "What's the funniest moment you've had on stream? :e22:",
+        "How do you deal with trolls in the chat? :e23:",
+        "The support from this community is incredible. :e24:",
+        "That was a clutch move! :e25:",
+        "Can you do a tutorial on that? :e26:",
+        "What's your favorite part of streaming? :e27:",
+        "Anyone else hyped for the weekend? :e28:",
+        "This is my new favorite stream. :e29:",
+        "Thanks for the laughs! :e30:",
+        "How do you handle technical issues? :e31:",
+        "The sound quality is great! :e32:",
+        "Can you share some of your best clips? :e33:",
+        "What's your strategy for this level? :e34:",
+        "That reaction was priceless! :e35:",
+        "How do you keep the chat engaged? :e36:",
+        "Loving the game choice tonight. :e37:",
+        "Can you recommend some other streamers? :e38:",
+        "What's your favorite streaming moment? :e39:",
+        "Thanks for the tips! :e40:",
+        "How do you stay calm under pressure? :e41:",
+        "The chat interaction is awesome. :e42:",
+        "Anyone else here from [Your City]? :e43:",
+        "What's your favorite snack during streams? :e44:",
+        "This stream always makes my day. :e45:",
+        "How do you come up with content ideas? :e46:",
+        "The overlays are so cool! :e47:",
+        "What's the hardest game you've played? :e48:",
+        "This community is amazing. :e49:",
+        "Thanks for the shoutout! :e50:"
+    ];
+      //////////////////////////////////////////////////////////////
+      // Start Tooltips
+      setToolTips();
+
+      ToogleHeader.addEventListener("click",function (e){ 
+        Header.classList.toggle("hide-header");
+      });
+      //////////////////////////////////////////////////////////////
+      // Auto Bot Send Message 
+      function AutoSendMessage(index,message) {
+        let iframe = document.querySelector(`.rooms-container > div:nth-child(${index}) > iframe`).contentWindow.document;
+        iframe.querySelector("#msgInput").value = message;
+        iframe.querySelector(".send-button").click();
+        setTimeout(
+          () => {            
+            if (
+              isPlay 
+            ) {
+              const randomIndex = Math.floor(Math.random() * Messages.length);
+              const index = Math.floor(Math.random() * document.querySelector(".rooms-container").children.length);
+              AutoSendMessage(index + 1,Messages[randomIndex]);
+            } else {
+              isPlay = false;
+            }
+          },
+          GetTimeOut()
+        );
+      }
+
+      function AutoScrollDown() {
+        for (let i = 0; i < document.querySelectorAll(`.rooms-container > div`).length; i++) {
+          let iframe = document.querySelector(`.rooms-container > div:nth-child(${i+1}) > iframe`).contentWindow.document;
+          let ChatBox = iframe.querySelector("#ChatBox");
+          ChatBox.scrollTo({top: ChatBox.scrollHeight + 100000});   
+        }
+      }
+
+      //////////////////////////////////////////////////////////////
+      function generateBadges() {
+        // Prioritize returning no badges
+        if (Math.random() < 0.5) {
+          return "";
+        }
+        
+        // Otherwise, randomly assign 1 to 3 badges
+        const badgeNumbers = [1, 2, 4, 3];
+        let badges = [];
+
+        // Determine the number of badges (1 to 3)
+        const badgeCount = Math.floor(Math.random() * 3) + 1;
+
+        // Randomly pick badges, ensuring no duplicates
+        while (badges.length < badgeCount) {
+          const randomIndex = Math.floor(Math.random() * badgeNumbers.length);
+          const selectedBadge = badgeNumbers[randomIndex];
+          if (!badges.includes(selectedBadge)) {
+            badges.push(selectedBadge);
+          }
+        }
+
+        // If badges contain 3, ensure it is the last item
+        // if (badges.includes(3)) {
+        //   badges = badges.filter(badge => badge !== 3);
+        //   badges.push(3);
+        // }
+
+        // Ensure max 3 badges
+        badges = badges.slice(0, 3);
+
+        return `&badges=${badges.join(',')}`;
+      }
+
+
+      function GetRoom() {
+        const params = new Proxy(new URLSearchParams(window.location.search), {
+          get: (searchParams, prop) => searchParams.get(prop),
+        });
+        return params.room;
+      }
+
+      document.title = (GetRoom() ?? "Unknown") + " Stream";
+      //////////////////////////////////////////////////////////////
+      document.querySelector(".room-name").innerHTML = RoomName;
+
+      RoomNameInput.addEventListener("keydown", function (e) {
+        if (e.code == "Space") {
+          e.preventDefault();
+        } else if (e.code == "Enter") {
+          JoinButton.click();
+        }
+      });
+      JoinButton.addEventListener("click", function (e) {
+        if (RoomNameInput.value == "" || RoomNameInput.value == null) {
+          RoomNameInput.classList.add("danger-border");
+        } else {
+          var joinRoomName = RoomNameInput.value.replaceAll(" ", "");
+          location.href = location.href + "?room=" + joinRoomName;
+        }
+      });
+
+      if (GetRoom() != null && GetRoom() != "") {
+        document.querySelector(".header").classList.remove("d-none");
+        document.querySelector(".room").classList.add("d-none");
+        CreateFrame();
+      } else {
+        document.querySelector(".header").classList.add("d-none");
+        document.querySelector(".room").classList.remove("d-none");
+      }
+      // CreateUser();
+
+      function CreateUser() {
+        setTimeout(
+          () => {            
+            if (
+              document.querySelector(".rooms-container").children.length <= GetViwers() - 1 &&
+              isPlay 
+            ) {
+              CreateFrame();
+              CreateUser();
+            }
+            else {
+              document.querySelector("#play svg").setAttribute("color","#FFFFFF")
+              isPlay = false;
+            }
+          },
+          document.querySelector(".rooms-container").children.length == 0
+            ? 0
+            : GetTimeOut()
+        );
+      }
+
+      document.querySelector("#increase").addEventListener("click", Increase);
+      document.querySelector("#decrease").addEventListener("click", Decrease);
+      document.querySelector("#play").addEventListener("click", Play);
+      document.querySelector("#Bot").addEventListener("click", Bot);
+      document.querySelector("#AutoScroll").addEventListener("click", AutoScrollDown);
+
+      function Increase() {
+        if (
+          document.querySelector(".rooms-container").children.length <
+          users.length
+        ) {
+          CreateFrame();
+        }
+      }
+
+      function Decrease() {
+        if (document.querySelector(".rooms-container").children.length > 1) {
+          document
+            .querySelectorAll(".rooms-container > div")
+            [
+              document.querySelectorAll(".rooms-container > div").length - 1
+            ].remove();
+        }
+      }
+
+      function Play() {
+        console.log(isPlay);
+        
+        if (!isPlay) {
+          document.querySelector("#play svg").setAttribute("color","#00FF00")
+          isPlay = true;
+          CreateUser();
+        } else {
+          document.querySelector("#play svg").setAttribute("color","#FFFFFF")
+          isPlay = false;
+        }
+      }
+
+      function Bot() {
+        if (!isPlay) {
+          document.querySelector("#Bot svg").setAttribute("color","#00FF00")
+          isPlay = true;          
+          // AutoSendMessage(Math.floor(Math.random() * document.querySelector(".rooms-container").children.length) + 1,Messages[Math.floor(Math.random() * Messages.length)]);
+        } else {
+          document.querySelector("#Bot svg").setAttribute("color","#FFFFFF")
+          isPlay = false;
+        }
+        fetch(`https://localhost:7179/api/v1/Chat/${GetRoom()}/toggleAutoChat?&interval=${GetTimeOut()}&isParallel=${document.getElementById("IsParallel").checked}&parallelLength=${GetViwers()}`);
+      }
+
+      function GetTimeOut() {
+        return document.getElementById("timeoutMS").value != ""
+          ? parseInt(document.getElementById("timeoutMS").value)
+          : 100;
+        }
+        
+      function GetViwers(){
+          return document.getElementById("MaxViewers").value != ""
+            ? parseInt(document.getElementById("MaxViewers").value)
+            : 20;
+      }
+
+      function RandomUniqueUser() {
+          if (document.querySelectorAll(".rooms-container > div").length == 0)
+            return GetRoom();
+
+          let UsedNames = [];
+          let UserInSequence = users[document.querySelector(".rooms-container").children.length];
+          document.querySelectorAll(".rooms-container > div").forEach(s => {
+              UsedNames.push(s.getAttribute("data-name"));
+          });
+
+          if (document.getElementById("IsSequence").checked && !UsedNames.includes(UserInSequence)) 
+          return UserInSequence;
+        
+          // Filter the users list to exclude names that are in UsedNames
+          let availableNames = users.filter(name => !UsedNames.includes(name));
+
+          // If no unique names are available, return null or a default value
+          if (availableNames.length === 0) {
+              return null; // or any default value you prefer
+          }
+
+          // Select a random name from the availableNames list
+          let randomIndex = Math.floor(Math.random() * availableNames.length);
+          return availableNames[randomIndex];
+      }
+
+      function CreateFrame() {
+        var UniqueUser = RandomUniqueUser();
+        var div = document.createElement("div");
+        div.innerHTML = `<div class='expand-button'>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" color="#ffffff" fill="none">
+                <path d="M7.4852 16.5149C6.9104 15.9401 7.00595 13.4982 7.00595 13.4982M7.4852 16.5149C8.06001 17.0897 10.5019 16.994 10.5019 16.994M7.4852 16.5149L11 13M16.5149 7.48512C15.9401 6.91031 13.4982 7.00596 13.4982 7.00596M16.5149 7.48512C17.0897 8.05993 16.994 10.5018 16.994 10.5018M16.5149 7.48512L13 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M2.5 12C2.5 7.52166 2.5 5.28249 3.89124 3.89124C5.28249 2.5 7.52166 2.5 12 2.5C16.4783 2.5 18.7175 2.5 20.1088 3.89124C21.5 5.28249 21.5 7.52166 21.5 12C21.5 16.4783 21.5 18.7175 20.1088 20.1088C18.7175 21.5 16.4783 21.5 12 21.5C7.52166 21.5 5.28249 21.5 3.89124 20.1088C2.5 18.7175 2.5 16.4783 2.5 12Z" stroke="currentColor" stroke-width="1.5" />
+            </svg>
+            </div>`;
+        var iframe = document.createElement("iframe");
+        // users[document.querySelector(".rooms-container").children.length]
+        iframe.src =
+          "http://127.0.0.1:5500/connect.html?name=" +
+          UniqueUser + generateBadges() +
+          "&room=" +
+          GetRoom() + "#" + Math.round(Math.random() * 1000000);
+        iframe.setAttribute("frameborder", "0");
+        iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
+        div.appendChild(iframe);
+        div.setAttribute('data-name',UniqueUser)
+        document.querySelector(".rooms-container").appendChild(div);
+        div
+          .querySelector(".expand-button")
+          .addEventListener("click", function (e) {
+            this.parentElement.classList.toggle("expand");
+          });
+      }
+      //Tooltips
+      function setToolTips() {
+
+        // Remove Active all Tips
+        document.querySelectorAll(".tooltip").forEach(e => e.remove());
+
+        const tooltipTriggerList = document.querySelectorAll(
+          '[data-bs-toggle="tooltip"]'
+        );
+        const tooltipList = [...tooltipTriggerList].map(
+          (tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl)
+        );
+      }
+    </script>
+  </body>
+</html>
